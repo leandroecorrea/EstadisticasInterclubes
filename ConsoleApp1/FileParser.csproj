@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="D:\EstadisticasInterclubes\FileParser\Parser.cs" Link="Parser.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Tabula" Version="0.1.3" />
   </ItemGroup>
 

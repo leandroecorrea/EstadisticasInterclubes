@@ -14,51 +14,6 @@ namespace FileParser
 {
     public class Parser
     {
-        private Result CreateResult(IReadOnlyList<Cell> row, PlayersMatch playersMatch)
-        {
-            Result result = new();
-            (int p1Result, int p2Result) = ParseHolesWon(row);
-            result.HolesWon = Math.Max(p2Result, p1Result);
-            result.HolesRemaining = Math.Min(p2Result, p1Result);
-            result.WinnerId = p1Result > p2Result ?
-                              playersMatch.PlayerOne.Id :
-                              p2Result > p1Result ?
-                              playersMatch.PlayerTwo.Id :
-                              Result.TIE_RESULT;
-            return result;
-        }
-
-        private (int, int) ParseHolesWon(IReadOnlyList<Cell> row)
-        {
-            int p1Result = 0;
-            int p2Result = 0;
-            if (!string.IsNullOrEmpty(row[1].GetText()))
-            {
-                if (!row[1].GetText().ToLowerInvariant().Contains("up"))
-                {
-                    int.TryParse(row[1].GetText().Split('/')[0].ToString(), out p1Result);
-                    int.TryParse(row[1].GetText().Split('/')[1].ToString(), out p2Result);
-                }
-                else
-                {
-                    int.TryParse(row[1].GetText()[0].ToString(), out p1Result);
-                }
-            }
-            else if (!string.IsNullOrEmpty(row[3].GetText()))
-            {
-                if (!row[3].GetText().ToLowerInvariant().Contains("up"))
-                {
-                    int.TryParse(row[3].GetText().Split('/')[0].ToString(), out p2Result);
-                    int.TryParse(row[3].GetText().Split('/')[1].ToString(), out p1Result);
-                }
-                else
-                {
-                    int.TryParse(row[3].GetText()[0].ToString(), out p2Result);
-                }
-            }
-            return (p1Result, p2Result);
-        }
-
         public IEnumerable<PlayersMatch> Parse(byte[] fileBytes)
         {
             List<PlayersMatch> matches = new();
@@ -118,5 +73,51 @@ namespace FileParser
             }
             return matches;
         }
+        private Result CreateResult(IReadOnlyList<Cell> row, PlayersMatch playersMatch)
+        {
+            Result result = new();
+            (int p1Result, int p2Result) = ParseHolesWon(row);
+            result.HolesWon = Math.Max(p2Result, p1Result);
+            result.HolesRemaining = Math.Min(p2Result, p1Result);
+            result.WinnerId = p1Result > p2Result ?
+                              playersMatch.PlayerOne.Id :
+                              p2Result > p1Result ?
+                              playersMatch.PlayerTwo.Id :
+                              Result.TIE_RESULT;
+            return result;
+        }
+
+        private (int, int) ParseHolesWon(IReadOnlyList<Cell> row)
+        {
+            int p1Result = 0;
+            int p2Result = 0;
+            if (!string.IsNullOrEmpty(row[1].GetText()))
+            {
+                if (!row[1].GetText().ToLowerInvariant().Contains("up"))
+                {
+                    int.TryParse(row[1].GetText().Split('/')[0].ToString(), out p1Result);
+                    int.TryParse(row[1].GetText().Split('/')[1].ToString(), out p2Result);
+                }
+                else
+                {
+                    int.TryParse(row[1].GetText()[0].ToString(), out p1Result);
+                }
+            }
+            else if (!string.IsNullOrEmpty(row[3].GetText()))
+            {
+                if (!row[3].GetText().ToLowerInvariant().Contains("up"))
+                {
+                    int.TryParse(row[3].GetText().Split('/')[0].ToString(), out p2Result);
+                    int.TryParse(row[3].GetText().Split('/')[1].ToString(), out p1Result);
+                }
+                else
+                {
+                    int.TryParse(row[3].GetText()[0].ToString(), out p2Result);
+                }
+            }
+            return (p1Result, p2Result);
+        }
+
+        
     }
 }
