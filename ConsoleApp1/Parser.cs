@@ -12,21 +12,12 @@ using Core.Entities;
 
 namespace FileParser
 {
-
-    
-    
     public class Parser
     {
         private Result CreateResult(IReadOnlyList<Cell> row, PlayersMatch playersMatch)
         {
             Result result = new();
-            int p1Result = 0;
-            int p2Result = 0;
-            if (!string.IsNullOrEmpty(row[1].GetText()))
-                int.TryParse(row[1].GetText()[0].ToString(), out p1Result);
-            if (!string.IsNullOrEmpty(row[3].GetText()))
-                int.TryParse(row[3].GetText()[0].ToString(), out p2Result);
-
+            (int p1Result, int p2Result) = ParseHolesWon(row);
             result.HolesWon = Math.Max(p2Result, p1Result);
             result.HolesRemaining = Math.Min(p2Result, p1Result);
             result.WinnerId = p1Result > p2Result ?
@@ -37,15 +28,45 @@ namespace FileParser
             return result;
         }
 
+        private (int, int) ParseHolesWon(IReadOnlyList<Cell> row)
+        {
+            int p1Result = 0;
+            int p2Result = 0;
+            if (!string.IsNullOrEmpty(row[1].GetText()))
+            {
+                if (!row[1].GetText().ToLowerInvariant().Contains("up"))
+                {
+                    int.TryParse(row[1].GetText().Split('/')[0].ToString(), out p1Result);
+                    int.TryParse(row[1].GetText().Split('/')[1].ToString(), out p2Result);
+                }
+                else
+                {
+                    int.TryParse(row[1].GetText()[0].ToString(), out p1Result);
+                }
+            }
+            else if (!string.IsNullOrEmpty(row[3].GetText()))
+            {
+                if (!row[3].GetText().ToLowerInvariant().Contains("up"))
+                {
+                    int.TryParse(row[3].GetText().Split('/')[0].ToString(), out p2Result);
+                    int.TryParse(row[3].GetText().Split('/')[1].ToString(), out p1Result);
+                }
+                else
+                {
+                    int.TryParse(row[3].GetText()[0].ToString(), out p2Result);
+                }
+            }
+            return (p1Result, p2Result);
+        }
+
         public IEnumerable<PlayersMatch> Parse(byte[] fileBytes)
         {
             List<PlayersMatch> matches = new();
-            List<Player> players = new();            
+            List<Player> players = new();
             using (PdfDocument document = PdfDocument.Open(fileBytes, new ParsingOptions() { ClipPaths = true }))
             {
                 ObjectExtractor oe = new ObjectExtractor(document);
                 PageArea page = oe.Extract(1);
-
                 IExtractionAlgorithm ea = new SpreadsheetExtractionAlgorithm();
                 List<Table> tables = ea.Extract(page);
                 tables.ForEach(x =>
@@ -95,7 +116,7 @@ namespace FileParser
                     }
                 });
             }
-            return matches.Take(10);
+            return matches;
         }
     }
 }
